@@ -1,0 +1,5 @@
+reports/
+learnings.md
+sheet-config.json
+*.log
+.DS_Store
