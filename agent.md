@@ -51,7 +51,7 @@ The agent doesn't just dump data. For every finding it:
 5. **Asks permission** before changing anything (--fix mode)
 6. **Gives a health score**: HEALTHY / MOSTLY OK / NEEDS ATTENTION
 
-## Capabilities (v2)
+## Capabilities
 
 ### Health Checks
 - [x] Memory usage + top consumers + swap detection
@@ -115,7 +115,7 @@ The agent doesn't just dump data. For every finding it:
 - Works on any macOS (Apple Silicon & Intel)
 - Windows equivalents in windows/ directory
 
-## Evolution Roadmap (v3+)
+## Roadmap (Planned)
 
 - [ ] Fan speed / CPU temperature tracking (via `powermetrics`)
 - [ ] Memory pressure trend graphs
