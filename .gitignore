@@ -1,5 +1,6 @@
 reports/
 learnings.md
 sheet-config.json
+known-networks.txt
 *.log
 .DS_Store

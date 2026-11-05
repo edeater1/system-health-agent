@@ -1,6 +1,8 @@
 # System Health Agent
 
-A self-improving system health monitor for **macOS** and **Windows**. Checks 100+ data points, auto-fixes common issues, explains everything in simple language, and sends weekly reports to a Google Sheet.
+A self-improving system health monitor and **security hardener** for **macOS** and **Windows**.
+
+Acts like a technician: finds problems, explains why they matter, shows the best fix, tells you what changes, and asks before acting.
 
 **No external tools required** — uses only built-in OS commands.
 
@@ -8,22 +10,42 @@ Works on: macOS (Apple Silicon & Intel) | Windows 10/11
 
 ---
 
+## What Makes This Different
+
+Most system health tools dump technical data and leave you to figure it out. This agent:
+
+| Feature | This Agent | Typical Tools |
+|---------|-----------|---------------|
+| **Explains findings** | "Your firewall is off — anyone on WiFi can try to connect" | "Firewall: 0" |
+| **Says why it matters** | "On public WiFi, hackers scan for unprotected Macs" | (nothing) |
+| **Shows the fix** | "Turn on firewall with stealth mode" | (nothing) |
+| **Shows impact** | "Mac becomes invisible on networks. AirDrop still works." | (nothing) |
+| **Asks before acting** | "Apply this fix? [y/N]" | Auto-changes or does nothing |
+| **Gives a score** | HEALTHY / MOSTLY OK / NEEDS ATTENTION | Raw numbers |
+
+---
+
 ## What It Checks
 
 | Area | Mac | Windows | What It Looks At |
 |------|:---:|:-------:|-----------------|
+| **Firewall** | ✅ | ✅ | On/off, stealth mode, incoming blocks |
+| **Remote Access** | ✅ | ✅ | ARD, VNC, SSH, Screen Sharing |
+| **Encryption** | ✅ | ✅ | FileVault / BitLocker |
+| **System Protection** | ✅ | — | SIP, Gatekeeper |
+| **Failed Logins** | ✅ | ✅ | Brute force detection |
 | **Memory** | ✅ | ✅ | RAM usage, per-app breakdown, memory pressure |
 | **CPU** | ✅ | ✅ | Load, usage, core count, chip model |
 | **Disk** | ✅ | ✅ | Space, SSD health, large files, temp/cache cleanup |
-| **Battery** | ✅ | ✅ | Cycle count, health %, charge, degradation |
-| **Security** | ✅ | ✅ | Firewall, encryption (FileVault/BitLocker), failed logins |
-| **Antivirus** | ✅ | ✅ | XProtect / Windows Defender status + last scan |
-| **Network** | ✅ | ✅ | WiFi signal, IPs, DNS, open ports |
-| **Temperature** | ✅ | — | Overheating warnings, fan status |
-| **Intrusion** | ✅ | ✅ | Failed logins, new accounts, late-night logins |
-| **Chrome** | ✅ | — | Extension count, heavy extension detection |
-| **Startup Items** | ✅ | ✅ | Launch agents / startup programs |
+| **Battery** | ✅ | ✅ | Cycle count, health %, degradation |
+| **Antivirus** | ✅ | ✅ | XProtect / Windows Defender status |
+| **Network** | ✅ | ✅ | WiFi, IPs, DNS, open ports, foreign connections |
+| **Temperature** | ✅ | — | Overheating warnings |
+| **Chrome** | ✅ | — | Extension count, heavy extensions |
+| **Backup** | ✅ | — | Time Machine status |
+| **Updates** | ✅ | — | Pending macOS updates |
 | **Large Files** | ✅ | ✅ | Files >100MB with keep/delete suggestions |
+| **Startup Items** | ✅ | ✅ | Launch agents / startup programs |
 
 ---
 
@@ -32,7 +54,7 @@ Works on: macOS (Apple Silicon & Intel) | Windows 10/11
 ### macOS
 
 ```bash
-git clone https://github.com/AISachin/system-health-agent.git
+git clone https://github.com/edeater1/system-health-agent.git
 cd system-health-agent
 
 # Interactive setup
@@ -45,7 +67,7 @@ cd system-health-agent
 ### Windows (PowerShell as Admin)
 
 ```powershell
-git clone https://github.com/AISachin/system-health-agent.git
+git clone https://github.com/edeater1/system-health-agent.git
 cd system-health-agent\windows
 
 # Interactive setup
@@ -59,49 +81,70 @@ cd system-health-agent\windows
 
 ## Example Output
 
-### What you see in Terminal / PowerShell:
-
 ```
-════════════════════════════════════════
-  SYSTEM HEALTH — 2026-11-06 12:00
-════════════════════════════════════════
+════════════════════════════════════════════════
+  SYSTEM HEALTH CHECK — 2026-11-06 02:40
+  Sachin's MacBook Pro | 24GB RAM | Apple M5 Pro
+════════════════════════════════════════════════
 
-  Memory: 21GB / 24GB | Free: 2862MB
-  Disk:   45% used | Free: 510GB
-  CPU:    8% | Procs: 612
+  Memory: 23GB / 24GB (3883MB free)
+  Disk:   2% used (642Gi free)
+  Load:   1.81 | Processes: 783
 
-  ISSUES (1):
-    ! Comet has 25 processes using 4251MB — excessive
+  ━━━ WARNINGS — Should Fix Soon ━━━━━━━━━━━━━
 
-  WARNINGS (2):
-    ~ 15 files in Downloads older than 30 days (2.1GB total)
-    ~ Battery cycle count is 847 (consider service after 1000)
+  1. Comet has 34 processes using 7854MB
+     Electron apps like Comet spawn many helper processes.
+     34 is excessive.
+     Fix: Quit Comet to free 7854MB
 
-  FIXED (2):
-    + Killed Comet (25 processes, 4251MB)
-    + Cleaned temp files (380MB)
+  2. No Time Machine backup configured
+     If your Mac's drive fails or gets stolen, there's no
+     backup to recover from.
+     Fix: Connect an external drive and enable Time Machine
 
-  Report: ./reports/health-2026-11-06_12-00.md
-════════════════════════════════════════
+  ━━━ ALL GOOD ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ✓ Firewall is ON
+  ✓ FileVault disk encryption is ON
+  ✓ System Integrity Protection (SIP) is ON
+  ✓ Gatekeeper is ON (blocks unverified apps)
+  ✓ Temperature normal — no overheating
+  ✓ Battery healthy — 3 cycles, condition: Normal
+
+  ─────────────────────────────────────────────
+  Score: MOSTLY OK  (2 warnings, 6 checks passed)
+
+  Run ./health-check.sh --fix to fix problems interactively
+════════════════════════════════════════════════
 ```
 
-### What you see in the Google Sheet:
+---
 
-| Section | What We Checked | Result | What It Means | Health |
-|---------|----------------|--------|---------------|--------|
-| About Your Laptop | Laptop Model | MacBook Pro M5 Pro | This is your laptop type | |
-| Brain Power (CPU) | How Busy Is It | 8% used | Your laptop brain is mostly relaxed | GOOD |
-| Temperature | Is It Overheating? | No | Your laptop is cool - no heat problems | GOOD |
-| Storage Space | Space Free | 510 GB | Plenty of room for more files | GOOD |
-| Memory (RAM) | Memory Free | Only 2.8 GB free | Getting tight - close some apps | WARNING |
-| Apps Eating Memory | Perplexity (Comet) | 4.2 GB! | BIGGEST memory eater! | PROBLEM! |
-| Battery | Times Charged | 847 out of 1000 | Battery getting older but still fine | OK |
-| Battery | Battery Health | Normal - 92% | Still holds 92% of original charge | GOOD |
-| Security - Locks | Firewall | ON | Protection wall active - hackers blocked | GOOD |
-| Security - Alerts | Failed Login Attempts | 3 in 7 days | Very few failed attempts - normal | GOOD |
-| Big Files Taking Space | DaVinci installer | 7.0 GB (old) | HUGE! 7 GB wasted - DELETE if installed | DELETE |
+## Security Hardening
 
-> Every row explained in plain English — no technical jargon.
+One-command full lockdown:
+
+```bash
+sudo ./harden-now.sh
+```
+
+This enables:
+- **Firewall + Stealth Mode** — invisible on networks
+- **Closes ARD, VNC, SSH** — no remote access
+- **Packet filter (pf)** — blocks dangerous ports, auto-blocks brute force
+- **Network auto-guard** — re-hardens on every new WiFi connection
+- **Privacy settings** — screen lock, file extensions, crash reports
+
+What **still works** after hardening:
+- AirDrop, AirPlay, Handoff, Universal Clipboard
+- Finder file sharing on local network
+- All your apps and internet
+
+```bash
+./firewall.sh --status    # Check security anytime
+./firewall.sh --undo      # Revert all changes
+```
 
 ---
 
@@ -110,8 +153,12 @@ cd system-health-agent\windows
 ### macOS
 
 ```bash
-./health-check.sh              # Quick health check
-./health-check.sh --fix        # Check + auto-fix issues
+./health-check.sh              # Smart health check with explanations
+./health-check.sh --fix        # Interactive fix (asks before each change)
+./health-check.sh --auto-fix   # Unattended fix (for cron/automation)
+./firewall.sh                  # Security status
+./firewall.sh --harden         # Apply security hardening
+sudo ./harden-now.sh           # One-command full lockdown
 ./full-audit.sh                # Detailed 100+ point audit → CSV
 ./optimizer.sh                 # Full optimization (what runs weekly)
 ./setup.sh                     # Configure for a new system
@@ -143,21 +190,9 @@ All settings live in **one file** per platform:
 | `SCHEDULE_DAY` | Which day to run weekly | Friday |
 | `SCHEDULE_HOUR` | What time to run | 12 (noon) |
 | `BLOATWARE_APPS` | Apps to kill when hogging memory | Comet, ChatGPT, Adobe |
-| `MEM_CRITICAL_MB` | Free RAM below this = PROBLEM | 2000 MB |
-| `DISK_CRITICAL_PCT` | Disk usage above this = PROBLEM | 90% |
+| `MEM_CRITICAL_MB` | Free RAM below this = CRITICAL | 2000 MB |
+| `DISK_CRITICAL_PCT` | Disk usage above this = CRITICAL | 90% |
 | `BATTERY_WARNING_CYCLES` | Battery cycles above this = WARNING | 800 |
-
-### Change Settings
-
-```bash
-# macOS: edit config.sh, then re-apply
-nano config.sh
-./setup.sh
-
-# Windows: edit windows/config.ps1, then re-apply
-notepad windows\config.ps1
-.\windows\setup.ps1
-```
 
 ---
 
@@ -176,15 +211,23 @@ Each system runs independently — **no shared data, no conflicts**.
 ./setup.sh --email friend@gmail.com --sheet SHEET_ID_3
 ```
 
-Each gets:
-- Its **own Google Sheet**
-- Its **own email**
-- Its **own schedule**
-- **Zero connection** between systems
+Each gets its own Google Sheet, email, schedule, and zero connection between systems.
 
 ---
 
-## How Auto-Fix Works (--fix / -Fix)
+## How Auto-Fix Works
+
+In `--fix` mode, the agent shows each problem, explains the fix and its impact, and asks for your permission:
+
+```
+  CRITICAL: Comet is eating 7854MB of memory (34 processes)
+  Why: Electron app bug — spawned 34 separate processes.
+  Fix: Force-quit Comet
+  What changes: Comet closes, you get ~7854MB back. Reopen anytime.
+  Apply this fix? [y/N]
+```
+
+In `--auto-fix` mode (for weekly cron), it applies fixes without asking.
 
 | What It Fixes | Mac | Windows |
 |--------------|:---:|:-------:|
@@ -193,7 +236,7 @@ Each gets:
 | Empty large trash / recycle bin | ✅ | ✅ |
 | Quit apps unused for 7+ days | ✅ | — |
 | Re-disable Chrome extensions that sync back | ✅ | — |
-| Clean old log files | ✅ | ✅ |
+| Re-enable firewall if turned off | ✅ | — |
 
 ---
 
@@ -203,18 +246,9 @@ The agent learns from its own history:
 
 1. **Trend analysis** — Compares last 4 reports to spot recurring issues
 2. **Learnings file** — Auto-updated with patterns and recommendations
-3. **Permanent fixes** — When an issue appears 3+ times, a fix is added automatically
-4. **macOS notifications** — Critical alerts pop up as system notifications
-
----
-
-## Google Sheet Integration
-
-Reports use **simple, plain English** — designed so anyone can understand.
-
-- Each weekly run adds rows with a week number (2026-W45, W46, etc.)
-- Upload requires [Claude Code](https://claude.com/claude-code) with Google Drive MCP
-- Or export the CSV manually from the `reports/` folder
+3. **Permanent fixes** — When an issue appears 3+ times, a fix is added
+4. **Security verification** — Every weekly run checks firewall + remote access
+5. **macOS notifications** — Critical alerts pop up as system notifications
 
 ---
 
@@ -224,10 +258,14 @@ Reports use **simple, plain English** — designed so anyone can understand.
 system-health-agent/
 ├── config.sh              ← macOS settings (edit this)
 ├── setup.sh               ← macOS one-time setup
-├── health-check.sh        ← macOS quick check
-├── full-audit.sh          ← macOS 100+ point audit
+├── health-check.sh        ← Smart health check + interactive fix
+├── firewall.sh            ← Security status + hardening
+├── harden-now.sh          ← One-command lockdown (sudo)
+├── network-guard.sh       ← Auto-hardens on network change
+├── pf-rules.conf          ← Packet filter firewall rules
+├── full-audit.sh          ← 100+ point detailed audit
 ├── simplify-audit.sh      ← Tech CSV → simple language
-├── optimizer.sh           ← macOS full weekly pipeline
+├── optimizer.sh           ← Full weekly pipeline (10 phases)
 ├── agent.md               ← Agent capabilities + roadmap
 ├── README.md              ← This file
 ├── .gitignore
@@ -247,7 +285,7 @@ system-health-agent/
 | **OS** | macOS 13+ (Ventura or later) | Windows 10/11 |
 | **Shell** | bash (built-in) | PowerShell 5.1+ (built-in) |
 | **Tools** | None — all built-in | None — all built-in |
-| **Admin** | Not required (except setup.sh for launchd) | Required for scheduled task setup |
+| **Admin** | Needed for security hardening | Required for scheduled task |
 | **Google Sheet** | Optional (needs Claude Code) | Optional (needs Claude Code) |
 
 ---

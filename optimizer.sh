@@ -195,6 +195,18 @@ if [ -f "$AUDIT_CSV" ]; then
   echo "  Simple report: $SIMPLE_CSV"
 fi
 
+# ─── Phase 10: Security verification ───
+echo ""
+echo "[Phase 10] Security verification..."
+if [ -f "$HEALTH_DIR/firewall.sh" ]; then
+  bash "$HEALTH_DIR/firewall.sh" --status 2>&1
+  FW_STATE=$(defaults read /Library/Preferences/com.apple.alf globalstate 2>/dev/null || echo "0")
+  if [[ "$FW_STATE" == "0" ]]; then
+    echo "  CRITICAL: Firewall is OFF!"
+    osascript -e 'display notification "Firewall is OFF! Run: sudo ./harden-now.sh" with title "SECURITY ALERT" subtitle "Your Mac is unprotected"' 2>/dev/null || true
+  fi
+fi
+
 echo ""
 echo "=== Optimizer complete — $(date) ==="
 echo "Technical CSV: $AUDIT_CSV"
