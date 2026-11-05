@@ -122,7 +122,7 @@ The agent doesn't just dump data. For every finding it:
 - [ ] Smart scheduling: run more often when issues detected, less when stable
 - [ ] Disk I/O monitoring (detect thrashing)
 - [ ] Auto-upload CSV to Google Sheet without Claude (using Google Sheets API)
-- [ ] Windows security hardening equivalent
+- [x] Windows security hardening equivalent
 - [ ] Network speed test integration
 - [ ] DNS-over-HTTPS enforcement
 

@@ -32,20 +32,22 @@ Most system health tools dump technical data and leave you to figure it out. Thi
 | **Firewall** | ✅ | ✅ | On/off, stealth mode, incoming blocks |
 | **Remote Access** | ✅ | ✅ | ARD, VNC, SSH, Screen Sharing |
 | **Encryption** | ✅ | ✅ | FileVault / BitLocker |
-| **System Protection** | ✅ | — | SIP, Gatekeeper |
+| **System Protection** | ✅ | ✅ | SIP, Gatekeeper / UAC, AutoPlay |
 | **Failed Logins** | ✅ | ✅ | Brute force detection |
 | **Memory** | ✅ | ✅ | RAM usage, per-app breakdown, memory pressure |
 | **CPU** | ✅ | ✅ | Load, usage, core count, chip model |
 | **Disk** | ✅ | ✅ | Space, SSD health, large files, temp/cache cleanup |
 | **Battery** | ✅ | ✅ | Cycle count, health %, degradation |
-| **Antivirus** | ✅ | ✅ | XProtect / Windows Defender status |
+| **Antivirus** | ✅ | ✅ | XProtect / Windows Defender status + definitions |
 | **Network** | ✅ | ✅ | WiFi, IPs, DNS, open ports, foreign connections |
 | **Temperature** | ✅ | — | Overheating warnings |
 | **Chrome** | ✅ | — | Extension count, heavy extensions |
-| **Backup** | ✅ | — | Time Machine status |
-| **Updates** | ✅ | — | Pending macOS updates |
+| **Backup** | ✅ | ✅ | Time Machine / Windows Backup status |
+| **Updates** | ✅ | ✅ | Pending macOS / Windows updates |
 | **Large Files** | ✅ | ✅ | Files >100MB with keep/delete suggestions |
 | **Startup Items** | ✅ | ✅ | Launch agents / startup programs |
+| **SMB v1** | — | ✅ | WannaCry-vulnerable protocol detection |
+| **Shares** | — | ✅ | Open network shares audit |
 
 ---
 
@@ -123,7 +125,7 @@ cd system-health-agent\windows
 
 ## Security Hardening
 
-One-command full lockdown:
+### macOS — One-command lockdown:
 
 ```bash
 sudo ./harden-now.sh
@@ -136,14 +138,33 @@ This enables:
 - **Network auto-guard** — re-hardens on every new WiFi connection
 - **Privacy settings** — screen lock, file extensions, crash reports
 
-What **still works** after hardening:
-- AirDrop, AirPlay, Handoff, Universal Clipboard
-- Finder file sharing on local network
-- All your apps and internet
+What **still works**: AirDrop, AirPlay, Handoff, file sharing, all apps.
 
 ```bash
 ./firewall.sh --status    # Check security anytime
 ./firewall.sh --undo      # Revert all changes
+```
+
+### Windows — One-command lockdown (Admin PowerShell):
+
+```powershell
+.\windows\firewall.ps1 -Harden
+```
+
+This enables:
+- **Windows Firewall ON** — all 3 profiles, inbound blocked
+- **Closes RDP, SSH, WinRM** — no remote access
+- **Disables SMB v1** — WannaCry protection
+- **Blocks dangerous ports** — RDP, Telnet, FTP, NetBIOS
+- **UAC enforced** — prevents silent admin installs
+- **AutoPlay disabled** — USB drives can't auto-run
+- **Screen lock** — 5 minute timeout
+
+What **still works**: all apps, internet, local file sharing (SMB v2/v3), Bluetooth, printers.
+
+```powershell
+.\windows\firewall.ps1            # Check security anytime
+.\windows\firewall.ps1 -Undo      # Revert all changes
 ```
 
 ---
@@ -167,8 +188,12 @@ sudo ./harden-now.sh           # One-command full lockdown
 ### Windows (PowerShell)
 
 ```powershell
-.\health-check.ps1             # Quick health check
-.\health-check.ps1 -Fix        # Check + auto-fix issues
+.\health-check.ps1             # Smart health check with explanations
+.\health-check.ps1 -Fix        # Interactive fix (asks before each change)
+.\health-check.ps1 -AutoFix    # Unattended fix (for Task Scheduler)
+.\firewall.ps1                 # Security status
+.\firewall.ps1 -Harden         # Apply security hardening (Run as Admin)
+.\firewall.ps1 -Undo           # Revert all hardening changes
 .\setup.ps1                    # Configure for a new system
 ```
 
@@ -232,11 +257,17 @@ In `--auto-fix` mode (for weekly cron), it applies fixes without asking.
 | What It Fixes | Mac | Windows |
 |--------------|:---:|:-------:|
 | Kill memory-hogging Electron apps | ✅ | ✅ |
-| Clean app caches that regrow | ✅ | ✅ |
+| Clean app caches / temp files | ✅ | ✅ |
 | Empty large trash / recycle bin | ✅ | ✅ |
 | Quit apps unused for 7+ days | ✅ | — |
 | Re-disable Chrome extensions that sync back | ✅ | — |
-| Re-enable firewall if turned off | ✅ | — |
+| Re-enable firewall if turned off | ✅ | ✅ |
+| Turn on Defender real-time protection | — | ✅ |
+| Update virus definitions | — | ✅ |
+| Disable Remote Desktop | — | ✅ |
+| Disable SMB v1 | — | ✅ |
+| Disable AutoPlay | — | ✅ |
+| Re-enable UAC | — | ✅ |
 
 ---
 
@@ -273,7 +304,8 @@ system-health-agent/
 └── windows/
     ├── config.ps1         ← Windows settings (edit this)
     ├── setup.ps1          ← Windows one-time setup
-    └── health-check.ps1   ← Windows quick check
+    ├── health-check.ps1   ← Smart health check + interactive fix
+    └── firewall.ps1       ← Security status + hardening + undo
 ```
 
 ---
